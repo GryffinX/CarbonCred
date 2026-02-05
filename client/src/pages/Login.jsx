@@ -1,80 +1,153 @@
 import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { Leaf, Mail, Lock, Building2, ShoppingCart } from 'lucide-react';
 
 function Login() {
-  const [isSignup, setIsSignup] = useState(false);
   const navigate = useNavigate();
-
-  // ✅ READ ROLE FROM URL
+  
+  // Read role from URL
   const [searchParams] = useSearchParams();
   const initialRole = searchParams.get("role") || "SME";
-  const [role, setRole] = useState(initialRole);
+  
+  const [isLogin, setIsLogin] = useState(true);
+  const [role, setRole] = useState(initialRole.toLowerCase());
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // TEMP DEMO NAVIGATION
-    if (role === "SME") {
-      navigate("/sme");
+    
+    // Navigate based on role selection
+    if (role === 'sme') {
+      navigate('/sme');
     } else {
-      navigate("/buyer");
+      navigate('/buyer');
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-green-50 px-4">
-      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-6">
-          {isSignup ? "Create an Account" : "Login to CarbonCred"}
-        </h2>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-emerald-50 px-4">
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <Link to="/" className="mb-8 flex items-center justify-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600">
+            <Leaf className="h-6 w-6 text-white" />
+          </div>
+          <span className="text-2xl font-bold text-emerald-700">CarbonCred</span>
+        </Link>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="email"
-            placeholder="Email"
-            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-            required
-          />
-
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-            required
-          />
-
-          {/* Role Selector */}
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Select Role
-            </label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full px-4 py-2 border rounded"
-            >
-              <option value="SME">Small Business (SME)</option>
-              <option value="BUYER">Buyer</option>
-            </select>
+        {/* Card */}
+        <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-xl">
+          <div className="mb-6 text-center">
+            <h1 className="text-2xl font-bold text-gray-900">
+              {isLogin ? 'Welcome Back' : 'Create Account'}
+            </h1>
+            <p className="mt-2 text-gray-600">
+              {isLogin 
+                ? 'Sign in to access your dashboard' 
+                : 'Start your sustainability journey today'}
+            </p>
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
-          >
-            {isSignup ? "Sign Up" : "Login"}
-          </button>
-        </form>
+          {/* Role Selector */}
+          <div className="mb-6">
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+              I am a...
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setRole('sme')}
+                className={`flex items-center justify-center gap-2 rounded-xl border-2 p-4 text-sm font-medium transition-all ${
+                  role === 'sme'
+                    ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
+                    : 'border-gray-200 text-gray-600 hover:border-emerald-300'
+                }`}
+              >
+                <Building2 className="h-5 w-5" />
+                SME
+              </button>
+              <button
+                type="button"
+                onClick={() => setRole('buyer')}
+                className={`flex items-center justify-center gap-2 rounded-xl border-2 p-4 text-sm font-medium transition-all ${
+                  role === 'buyer'
+                    ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
+                    : 'border-gray-200 text-gray-600 hover:border-emerald-300'
+                }`}
+              >
+                <ShoppingCart className="h-5 w-5" />
+                Buyer
+              </button>
+            </div>
+          </div>
 
-        {/* Toggle Login / Signup */}
-        <p className="text-center text-sm mt-4">
-          {isSignup ? "Already have an account?" : "New here?"}{" "}
-          <button
-            onClick={() => setIsSignup(!isSignup)}
-            className="text-green-600 font-medium"
-          >
-            {isSignup ? "Login" : "Create one"}
-          </button>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Email */}
+            <div>
+              <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-700">
+                Email
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@company.com"
+                  className="w-full rounded-xl border border-gray-200 py-3 pl-11 pr-4 text-gray-900 placeholder-gray-400 transition-colors focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div>
+              <label htmlFor="password" className="mb-2 block text-sm font-medium text-gray-700">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full rounded-xl border border-gray-200 py-3 pl-11 pr-4 text-gray-900 placeholder-gray-400 transition-colors focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="w-full rounded-xl bg-emerald-600 py-3 text-base font-semibold text-white shadow-lg transition-all hover:bg-emerald-700 hover:shadow-xl"
+            >
+              {isLogin ? 'Sign In' : 'Create Account'}
+            </button>
+          </form>
+
+          {/* Toggle */}
+          <p className="mt-6 text-center text-sm text-gray-600">
+            {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
+            <button
+              type="button"
+              onClick={() => setIsLogin(!isLogin)}
+              className="font-medium text-emerald-600 hover:text-emerald-700"
+            >
+              {isLogin ? 'Create account' : 'Sign in'}
+            </button>
+          </p>
+        </div>
+
+        {/* Back to Home */}
+        <p className="mt-6 text-center text-sm text-gray-500">
+          <Link to="/" className="hover:text-emerald-600">
+            ← Back to Home
+          </Link>
         </p>
       </div>
     </div>
