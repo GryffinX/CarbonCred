@@ -19,9 +19,9 @@ class CustomUserManager(BaseUserManager):
             raise ValueError("Organization name and website are required")
         email = self.normalize_email(email)
 
-        if self.model.onjects.filter(
-            organization_name_iexact=organization_name.strip(),
-            website_iexact=website.strip()
+        if self.model.objects.filter(
+            organization_name__iexact=organization_name.strip(),
+            website__iexact=website.strip()
         ).exists():
             raise ValidationError("An account with this organization already exists.")
         

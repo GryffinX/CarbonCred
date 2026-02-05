@@ -1,0 +1,70 @@
+# ===============================
+# Python / Django
+# ===============================
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Environment variables
+.env
+.env.*
+*.env
+
+# SQLite (we use Postgres)
+db.sqlite3
+db.sqlite3-journal
+
+# Logs
+*.log
+
+# Django static/media
+media/
+staticfiles/
+
+# ===============================
+# VS Code / IDE
+# ===============================
+
+.vscode/
+.idea/
+
+# ===============================
+# OS junk
+# ===============================
+
+.DS_Store
+Thumbs.db
+
+# ===============================
+# Testing / coverage
+# ===============================
+
+.pytest_cache/
+htmlcov/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+
+# ===============================
+# Node / Frontend (future)
+# ===============================
+
+node_modules/
+build/
+dist/
+
+# ===============================
+# Docker (future)
+# ===============================
+
+*.pid
+*.sock
