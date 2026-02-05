@@ -10,7 +10,15 @@ class CarbonProjectSerializer(serializers.ModelSerializer):
 class ReductionProjectDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReductionProjectData
-        fields = "__all__"
+        fields = [
+            "project",
+            "solar_capacity_kw",
+            "annual_generation_kwh",
+            "baseline_energy_kwh",
+            "post_project_energy_kwh",
+            "waste_recycled_kg",
+        ]
+
 
 class EmissionReportSerializer(serializers.ModelSerializer):
     class Meta:

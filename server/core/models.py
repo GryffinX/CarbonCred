@@ -85,7 +85,7 @@ class HashLedgerEntry(models.Model):
     def save(self, *args, **kwargs):
         if self.pk is not None:
             raise Exception("Ledger is append-only. Updates are not allowed.")
-        super.save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         raise Exception("Ledger entries cannot be deleted.")

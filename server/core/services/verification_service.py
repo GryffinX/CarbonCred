@@ -39,8 +39,9 @@ def verify_reduction_project(project_id: int):
     return reduction_kg
 
 def get_last_hash():
-    last_entry = HashLedgerEntry.objects.order_by("-created_at").first()
+    last_entry = HashLedgerEntry.objects.order_by("-timestamp").first()
     return last_entry.hash if last_entry else "GENESIS"
+
 
 def generate_hash(data_string: str) -> str:
     return hashlib.sha256(data_string.encode()).hexdigest()
@@ -145,3 +146,140 @@ def verify_emission_report(report_id: int):
         "emissions_kg": emissions_kg,
         "verification_score": verification_score
     }
+
+def is_credit_retired(credit_id: str) -> bool:
+    return HashLedgerEntry.objects.filter(
+        credit_id=credit_id,
+        event_type="RETIRE"
+    ).exists()
+
+
+def get_current_owner(credit_id: str):
+
+    last_entry = (
+        HashLedgerEntry.objects
+        .filter(credit_id=credit_id)
+        .order_by("-timestamp")
+        .first()
+    )
+
+    return last_entry.to_entity if last_entry else None
+
+
+def get_marketplace_credits():
+
+    minted_entries = HashLedgerEntry.objects.filter(
+        event_type="MINT",
+        to_entity="MARKET"
+    ).order_by("-timestamp")
+
+    credits = []
+
+    for entry in minted_entries:
+        owner = get_current_owner(entry.credit_id)
+
+        if owner == "MARKET":
+            credits.append({
+                "credit_id": entry.credit_id,
+                "project_id": entry.metadata.get("project_id")
+            })
+
+    return credits
+
+
+
+def buy_credit(credit_id: str, buyer_id: int):
+
+    if is_credit_retired(credit_id):
+        raise Exception("Credit already retired")
+
+    owner = get_current_owner(credit_id)
+
+    if owner != "MARKET":
+        raise Exception("Credit not available")
+
+    create_ledger_entry(
+        event_type="TRADE",
+        credit_id=credit_id,
+        from_entity="MARKET",
+        to_entity=str(buyer_id),
+        metadata={}
+    )
+
+
+def retire_credit(credit_id: str, user_id: int):
+
+    if is_credit_retired(credit_id):
+        raise Exception("Already retired")
+
+    owner = get_current_owner(credit_id)
+
+    if owner != str(user_id):
+        raise Exception("Not owner")
+
+    create_ledger_entry(
+        event_type="RETIRE",
+        credit_id=credit_id,
+        from_entity=str(user_id),
+        to_entity="RETIRED",
+        metadata={}
+    )
+
+# ==============================
+# WALLET / DASHBOARD HELPERS
+# ==============================
+
+def get_user_owned_credits(user_id: str):
+    """
+    Returns credits currently owned by user (not retired)
+    """
+    from core.models import HashLedgerEntry
+
+    owned = HashLedgerEntry.objects.filter(
+        to_entity=user_id
+    ).exclude(event_type="RETIRE")
+
+    return [str(entry.credit_id) for entry in owned]
+
+
+def get_user_retired_credits(user_id: str):
+    from core.models import HashLedgerEntry
+
+    retired = HashLedgerEntry.objects.filter(
+        from_entity=user_id,
+        event_type="RETIRE"
+    )
+
+    return [str(entry.credit_id) for entry in retired]
+
+
+def retire_credit(credit_id: str, user_id: str):
+    """
+    Final lifecycle step
+    """
+
+    from core.models import HashLedgerEntry
+
+    last_entry = (
+        HashLedgerEntry.objects
+        .filter(credit_id=credit_id)
+        .order_by("-timestamp")
+        .first()
+    )
+
+    if not last_entry:
+        raise Exception("Credit does not exist")
+
+    if last_entry.to_entity != user_id:
+        raise Exception("You do not own this credit")
+
+    if last_entry.event_type == "RETIRE":
+        raise Exception("Credit already retired")
+
+    create_ledger_entry(
+        event_type="RETIRE",
+        credit_id=credit_id,
+        from_entity=user_id,
+        to_entity="RETIRED",
+        metadata={}
+    )
