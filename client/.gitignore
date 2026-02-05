@@ -22,5 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+<<<<<<< HEAD
+=======
+node_modules/
+>>>>>>> ac5e7c8 (Web Page base)
 dist
 .env
