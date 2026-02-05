@@ -89,3 +89,71 @@ class HashLedgerEntry(models.Model):
 
     def delete(self, *args, **kwargs):
         raise Exception("Ledger entries cannot be deleted.")
+    
+from django.conf import settings
+from django.db import models
+
+
+class EmissionReport(models.Model):
+
+    QUARTERS = (
+        ("Q1", "Quarter 1"),
+        ("Q2", "Quarter 2"),
+        ("Q3", "Quarter 3"),
+        ("Q4", "Quarter 4"),
+    )
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="emission_reports"
+    )
+
+    year = models.IntegerField()
+    quarter = models.CharField(max_length=2, choices=QUARTERS)
+
+    electricity_kwh = models.FloatField()
+
+    diesel_liters = models.FloatField(default=0)
+    petrol_liters = models.FloatField(default=0)
+    natural_gas_m3 = models.FloatField(default=0)
+
+    flight_km = models.FloatField(default=0)
+    car_km = models.FloatField(default=0)
+
+    waste_kg = models.FloatField(default=0)
+    recycled_waste_kg = models.FloatField(default=0)
+
+    estimated_emissions_kg = models.FloatField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "year", "quarter")
+
+    def __str__(self):
+        return f"{self.user} - {self.year} {self.quarter}"
+
+
+class ReductionProjectData(models.Model):
+
+    project = models.OneToOneField(
+        "CarbonProject",
+        on_delete=models.CASCADE,
+        related_name="reduction_data"
+    )
+
+    solar_capacity_kw = models.FloatField(null=True, blank=True)
+    annual_generation_kwh = models.FloatField(null=True, blank=True)
+
+    baseline_energy_kwh = models.FloatField(null=True, blank=True)
+    post_project_energy_kwh = models.FloatField(null=True, blank=True)
+
+    waste_recycled_kg = models.FloatField(null=True, blank=True)
+
+    estimated_reduction_kg = models.FloatField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Reduction data for {self.project.title}"
