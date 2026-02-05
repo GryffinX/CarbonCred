@@ -89,9 +89,56 @@ class HashLedgerEntry(models.Model):
 
     def delete(self, *args, **kwargs):
         raise Exception("Ledger entries cannot be deleted.")
-    
-from django.conf import settings
-from django.db import models
+
+class CarbonProject(models.Model):
+
+    SUBMISSION_TYPES = (
+        ("reduction", "Reduction Project"),
+        ("emission", "Emission Assessment"),
+    )
+
+    METHODOLOGY_CHOICES = (
+        ("solar_reduction", "Solar Displacement"),
+        ("efficiency_reduction", "Energy Efficiency"),
+        ("waste_reduction", "Waste Recycling"),
+        ("electricity_emission", "Electricity Emissions"),
+        ("fuel_emission", "Fuel Emissions"),
+        ("travel_emission", "Travel Emissions"),
+    )
+
+    STATUS_CHOICES = (
+        ("draft", "Draft"),
+        ("submitted", "Submitted"),
+        ("processing", "Processing"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
+    )
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="projects"
+    )
+
+    submission_type = models.CharField(max_length=20, choices=SUBMISSION_TYPES)
+    methodology = models.CharField(max_length=50, choices=METHODOLOGY_CHOICES)
+
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+
+    year = models.IntegerField()
+    quarter = models.CharField(max_length=2)
+
+    ai_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
+
+    estimated_emissions_kg = models.FloatField(null=True, blank=True)
+    estimated_reduction_kg = models.FloatField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
 
 
 class EmissionReport(models.Model):
